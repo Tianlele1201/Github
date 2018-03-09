@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+<style>
+	*{
+		margin:0;
+		padding:0;
+	}
+	#canvas{
+		display:block;
+		background:#000;
+		width:100%;
+		height:100%;/* 拉伸画布*/
+	}
+</style>
+
+
+</head>
+<body>
+	<canvas id="canvas"></canvas>
+	<script>
+	window.requesAnimFrame=(function(){
+		return window.requesAnimFrame||
+		window.webkitRequesAnimFrame||window.mozRequestAnimFrame
+		||function(callback){
+			window.setTimeout(callback,1000/60);
+		}
+	})()
+		var Canvas={}; //命名空间
+		//星空背景连线特效
+		Canvas.animata={
+			//初始化
+			init:function(){
+				console.log(this);
+				var canvas=document.getElementById("canvas");
+				this.cxt=canvas.getContext("2d");
+
+				canvas.width=window.innerWidth;
+				canvas.height=window.innerHeight;
+				//console.log(this);
+				this.cw=canvas.width;
+				this.ch=canvas.height;
+				this.num=200; //初始化小圆点的数量
+				this.data=[];//储存初始化坐标点
+				for(var i=0;i<this.num;i++){  //循环遍历生成每个随机坐标点
+					this.data[i]={
+						x:Math.random()*this.cw,
+						y:Math.random()*this.ch,
+						//自定义模拟速度增量
+						cX:Math.random()*0.6-0.3,
+						cY:Math.random()*0.6-0.3,
+					}
+					this.drawCircle(this.data[i].x,this.data[i].y);
+				}
+			},
+			//绘制粉色圆点
+			drawCircle:function(x,y){
+				var cxt=this.cxt;
+				cxt.save();
+				cxt.fillStyle="pink";
+				cxt.beginPath();
+				cxt.arc(x,y,0.5,Math.PI*2,false);
+				cxt.closePath();
+				cxt.fill();
+				cxt.restore();
+
+			},
+			//绘制线条
+			drawLine:function(x1,y1,x2,y2){
+				var cxt=this.cxt;
+				cxt.save();
+				var color=cxt.createLinearGradient(x1,y1,x2,y2);
+				color.addColorStop(0,"#fff");
+				color.addColorStop(1,"#333");
+				cxt.strokeStyle=color;
+				cxt.beginPath();
+				cxt.moveTo(x1,y1);//起点
+				cxt.lineTo(x2,y2);//终点
+				cxt.closePath();
+				cxt.stroke();
+				cxt.restore();
+			},
+			//粉点运动
+			moveCircle:function(){
+				this.cxt.clearRect(0,0,this.cw,this.ch);
+				//速度牵引量
+				for(var i=0;i<this.num;i++){ //当前点
+					this.data[i].x += this.data[i].cX;
+					this.data[i].y += this.data[i].cY;
+					//边界值判断
+					if(this.data[i].x>this.cw||this.data[i].x<0)
+						this.data[i].cX=-this.data[i].cX;
+					if(this.data[i].y>this.cw||this.data[i].y<0)
+						this.data[i].cY=-this.data[i].cY;
+					//绘制粉点
+					this.drawCircle(this.data[i].x,this.data[i].y);
+					//用勾股定理判断是否连线
+					for(var j=i+1;j<this.num;j++){//下一个点
+						if((this.data[i].x-this.data[j].x)*
+							(this.data[i].x-this.data[j].x)+
+							(this.data[i].y-this.data[j].y)*
+							(this.data[i].y-this.data[j].y)
+							<=50*50){
+							this.drawLine(this.data[i].x,this.data[i].y,this.data[j].x,this.data[j].y)
+						}
+					}
+				}
+			}
+		}
+		Canvas.animata.init();
+		(function animloop(callback){
+			window.requesAnimFrame(animloop);
+			Canvas.animata.moveCircle();
+		})()
+		
+
+	</script>
+	<script>
+	/*var canvas=document.getElementById("canvas");
+		//初始化画布大小
+		canvas.width=window.innerWidth；
+		canvas.height=window.innerHeight;*/
+		//小型项目:命名空间 简单 好用
+		//var a={}  最大空间 不在直接里面写，在里面挂载
+		//a.b={} a.c={}
+		//全局变量 变量覆盖 功能覆盖
+	</script>
+
+</body>
+</html>
